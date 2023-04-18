@@ -49,11 +49,8 @@
             </p>
         {% endfor %}
     </p>
+    <p>{{ form.is_teacher() }} {{ form.is_teacher.label }}</p>
     <p>{{ form.submit(type="submit", class="btn btn-success") }}</p>
     {{message}}
-    <div class="btn-group" role="group" aria-label="Basic outlined example">
-      <button type="button" class="btn btn-outline-success">Ученик</button>
-      <button type="button" class="btn btn-outline-success">Учитель</button>
-    </div>
 </form>
 {% endblock %}
