@@ -87,21 +87,21 @@ def login():
     return render_template('login.html', title='Авторизация', form=form)
 
 
-@app.route('/profile')
-def profile():
-    form = ProfileForm
-    db_sess = db_session.create_session()
-    user = db_sess.query(User).filter(User.email == current_user.email).first()
-    if form.validate_on_submit():
-        if not user.is_teacher:
-            user.set_code(form.enter_code.data)
-            db_sess.commit()
-    if user.is_teacher:
-        return render_template('profile.html', title='Профиль', email=user.email,
-                               code=user.teacher_code, form=form)
-    else:
-        return render_template('profile.html', title='Профиль', email=user.email,
-                               code='', form=form)
+# @app.route('/profile')
+# def profile():
+#     form = ProfileForm
+#     db_sess = db_session.create_session()
+#     user = db_sess.query(User).filter(User.email == current_user.email).first()
+#     if form.validate_on_submit():
+#         if not user.is_teacher:
+#             user.set_code(form.enter_code.data)
+#             db_sess.commit()
+#     if user.is_teacher:
+#         return render_template('profile.html', title='Профиль', email=user.email,
+#                                code=user.teacher_code, form=form)
+#     else:
+#         return render_template('profile.html', title='Профиль', email=user.email,
+#                                code='', form=form)
 
 
 if __name__ == '__main__':
