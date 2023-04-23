@@ -1,13 +1,9 @@
 from flask import Flask, render_template, redirect
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-import datetime
-import sqlalchemy
 from TCG import generate_code
 from data import db_session
-from data.users import User
-from forms.user import RegisterForm
-from forms.loginform import LoginForm
-from forms.profileform import ProfileForm
+from data.data_types import User, Lesson, Task
+from forms.forms import LoginForm, RegisterForm, ProfileForm, LessonCreationForm, StudyForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
@@ -62,8 +58,8 @@ def reqister():
                         break
                 else:
                     break
-
                 code = generate_code()
+
             user.set_code(code)
         user.set_password(form.password.data)
         db_sess.add(user)
@@ -87,21 +83,47 @@ def login():
     return render_template('login.html', title='Авторизация', form=form)
 
 
-@app.route('/profile')
+@app.route('/profile', methods=['GET', 'POST'])
 def profile():
-    form = ProfileForm
+    form = ProfileForm()
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.email == current_user.email).first()
     if form.validate_on_submit():
-        if not user.is_teacher:
-            user.set_code(form.enter_code.data)
+        if db_sess.query(User).filter(User.teacher_code == form.enter_code.data).all():
+            user.teacher_code = form.enter_code.data
             db_sess.commit()
-    if user.is_teacher:
-        return render_template('profile.html', title='Профиль', email=user.email,
-                               code=user.teacher_code, form=form)
-    else:
-        return render_template('profile.html', title='Профиль', email=user.email,
-                               code='', form=form)
+        else:
+            return render_template('profile.html', title='Профиль', user=user, message='Учителя с таким кодом не существует', form=form)
+        return render_template('profile.html', title='Профиль', user=user, form=form)
+    return render_template('profile.html', title='Профиль', user=user, form=form)
+
+
+@app.route('/study/lesson_creation', methods=['GET', 'POST'])
+def lesson_creation():
+    form = LessonCreationForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).filter(User.email == current_user.email).first()
+        lesson = Lesson(
+            title=form.title.data,
+            theory=form.theory.data,
+            teacher_code=user.teacher_code
+        )
+        db_sess.add(lesson)
+        db_sess.commit()
+        return redirect('/study')
+    return render_template('lesson_creation.html', title='Создание урока', form=form)
+
+
+@app.route('/study', methods=['GET', 'POST'])
+def study():
+    form = StudyForm()
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.email == current_user.email).first()
+    lessons = db_sess.query(Lesson).filter(Lesson.teacher_code == user.teacher_code).all()
+    if form.validate_on_submit():
+        return redirect('/study/lesson_creation')
+    return render_template('study.html', title='Обучение',  lessons=lessons, user=user, form=form)
 
 
 if __name__ == '__main__':

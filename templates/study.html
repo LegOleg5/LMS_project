@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    {% if lessons %}
+        {% for lesson in lessons %}
+            <p>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ lesson.title }}</h5>
+                    <h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6>
+                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                    <a href="#" class="card-link">Смотреть</a>
+                </div>
+            </div>
+            </p>
+        {% endfor %}
+    {% else %}
+        <p>
+            <div class="card">
+                <div class="card-body">
+                    <p class="card-text">
+                    <font size="5">
+                    {% if user.is_teacher %}
+                        Вы пока не добавили уроков
+                    {% else %}
+                        {% if user.teacher_code %}
+                            Пока нету уроков от этого преподавателя
+                        {% else %}
+                            Вы пока не состоите в группе
+                        {% endif %}
+                    {% endif %}
+                </font>
+                </div>
+            </div>
+        </p>
+    {% endif %}
+    {% if user.is_teacher %}
+        <p>{{ form.submit(type="submit", class="btn btn-success") }}</p>
+    {% endif %}
+    {{message}}
+</form>
+{% endblock %}

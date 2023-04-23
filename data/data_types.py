@@ -16,7 +16,7 @@ class User(SqlAlchemyBase, UserMixin):
                               index=True, unique=True, nullable=True)
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     is_teacher = sqlalchemy.Column(sqlalchemy.Boolean)
-    teacher_code = sqlalchemy.Column(sqlalchemy.String, nullable=True, unique=True)
+    teacher_code = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     created_date = sqlalchemy.Column(sqlalchemy.DateTime,
                                      default=datetime.datetime.now)
 
@@ -28,3 +28,26 @@ class User(SqlAlchemyBase, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.hashed_password, password)
+
+
+class Lesson(SqlAlchemyBase):
+    __tablename__ = 'lessons'
+
+    id = sqlalchemy.Column(sqlalchemy.Integer,
+                           primary_key=True, autoincrement=True)
+    title = sqlalchemy.Column(sqlalchemy.String)
+    theory = sqlalchemy.Column(sqlalchemy.Text, nullable=True)
+    teacher_code = sqlalchemy.Column(sqlalchemy.String)
+
+
+class Task(SqlAlchemyBase):
+    __tablename__ = 'tasks'
+
+    id = sqlalchemy.Column(sqlalchemy.Integer,
+                           primary_key=True, autoincrement=True)
+    lesson_id = sqlalchemy.Column(sqlalchemy.Integer)
+    title = sqlalchemy.Column(sqlalchemy.String)
+    cond = sqlalchemy.Column(sqlalchemy.Text)
+    test_input = sqlalchemy.Column(sqlalchemy.String)
+    right_ans = sqlalchemy.Column(sqlalchemy.String)
+

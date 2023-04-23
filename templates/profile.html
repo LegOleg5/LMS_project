@@ -2,7 +2,7 @@
 
 {% block content %}
     <form action="" method="post">
-            {{ form.hidden_tag() }}
+    {{ form.hidden_tag() }}
       <div class="card" style="width: 100%; height: 100rem">
         <div class="card-body info">
           <h2 class="card-title" style="margin: auto">Профиль</h2>
@@ -10,23 +10,34 @@
             <font size="5">
             <br>
             Почта:<br>
-            {{ email }}<br><br>
-            {% if code != '' %}
-              Учительский код:<br>
-              {{ code }}
+            {{ user.email }}<br><br>
+            {% if user.teacher_code %}
+                {% if user.is_teacher %}
+                    Учительский код:<br>
+                    {{ user.teacher_code }}
+                {% else %}
+                    <p>
+                    Текущий учительский код:<br>
+                    {{ user.teacher_code }}
+                    </p>
+                    Сменить учителя:
+                {% endif %}
             {% else %}
-              Введите учительский код:<br>
-              {{ form.enter_code(class="form-control", type="email") }}<br>
-                  {% for error in form.email.errors %}
+                Введите учительский код:<br>
+            {% endif %}
+            {% if not user.is_teacher %}
+                {{ form.enter_code(class="form-control") }}<br>
+                  {% for error in form.enter_code.errors %}
                       <div class="alert alert-danger" role="alert">
                           {{ error }}
                       </div>
                   {% endfor %}
+                {{message}}
                   <p>{{ form.submit(type="submit", class="btn btn-success") }}</p>
             {% endif %}
             </font>
           </p>
-          <a href="/logout" class="btn btn-danger">Выйти</a>
+          <a href="/logout" class="btn btn-danger">Выйти из аккаунта</a>
         </div>
       </div>
     </form>
