@@ -48,6 +48,19 @@ class Task(SqlAlchemyBase):
     lesson_id = sqlalchemy.Column(sqlalchemy.Integer)
     title = sqlalchemy.Column(sqlalchemy.String)
     cond = sqlalchemy.Column(sqlalchemy.Text)
-    test_input = sqlalchemy.Column(sqlalchemy.String)
-    right_ans = sqlalchemy.Column(sqlalchemy.String)
+    solved_by = sqlalchemy.Column(sqlalchemy.Text, nullable=True)
 
+    def solved_by(self, user):
+        self.solved_by += f'{user.id};'
+
+
+class Solution(SqlAlchemyBase):
+    __tablename__ = 'solutions'
+
+    id = sqlalchemy.Column(sqlalchemy.Integer,
+                           primary_key=True, autoincrement=True)
+    task_id = sqlalchemy.Column(sqlalchemy.Integer)
+    user_id = sqlalchemy.Column(sqlalchemy.Integer)
+    text = sqlalchemy.Column(sqlalchemy.Text)
+    checked = sqlalchemy.Column(sqlalchemy.Boolean)
+    correct = sqlalchemy.Column(sqlalchemy.Boolean)

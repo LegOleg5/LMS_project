@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <div class="card" style="width: 100%; height: 100rem">
+        <div class="card-body info">
+            <h2 class="card-title" style="margin: auto">{{ task.title }}</h2><br>
+            <p class="card-text">
+                <font size="3">
+                    {{ task.cond }}
+                </font>
+                {% if user.is_teacher %}
+                    {% if solutions %}
+                        {% for solution in solutions %}
+                            <p>
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Пользователь {{ solution.user_id }}</h5>
+                                    <p class="card-text">
+                                        {{ solution.text }}
+                                    </p>
+                                    <a href="/study/lesson/task/check/!1={{ solution.id }}/1" class="btn btn-success">Правильно</a>
+                                    <a href="/study/lesson/task/check/!1={{ solution.id }}/0" class="btn btn-danger">Неправильно</a>
+                                </div>
+                            </div>
+                            </p>
+                        {% endfor %}
+                    {% endif %}
+                {% else %}
+                    <p>
+                    <p>
+                    {% if user_solution.checked %}
+                        {% if user_solution.correct %}
+                            Правильно!
+                        {% else %}
+                            Неправильно
+                        {% endif %}
+                    {% endif %}
+                    </p>
+                    {{ form.solution.label }}<br>
+                    {{ form.solution(class="form-control") }}<br>
+                    {% for error in form.solution.errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                    </p>
+                    <p>{{ form.submit(type="submit", class="btn btn-success") }}</p>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    {{message}}
+</form>
+{% endblock %}

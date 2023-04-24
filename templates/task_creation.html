@@ -13,9 +13,9 @@
         {% endfor %}
     </p>
     <p>
-        {{ form.theory.label }}<br>
-        {{ form.theory(class="form-control") }}<br>
-        {% for error in form.theory.errors %}
+        {{ form.cond.label }}<br>
+        {{ form.cond(class="form-control") }}<br>
+        {% for error in form.cond.errors %}
             <p class="alert alert-danger" role="alert">
                 {{ error }}
             </p>

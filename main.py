@@ -1,9 +1,9 @@
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, request
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from TCG import generate_code
 from data import db_session
-from data.data_types import User, Lesson, Task
-from forms.forms import LoginForm, RegisterForm, ProfileForm, LessonCreationForm, StudyForm
+from data.data_types import User, Lesson, Task, Solution
+from forms.forms import LoginForm, RegisterForm, ProfileForm, LessonCreationForm, StudyForm, LessonForm, TaskCreationForm, TaskForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
@@ -93,7 +93,8 @@ def profile():
             user.teacher_code = form.enter_code.data
             db_sess.commit()
         else:
-            return render_template('profile.html', title='Профиль', user=user, message='Учителя с таким кодом не существует', form=form)
+            return render_template('profile.html', title='Профиль', user=user,
+                                   message='Учителя с таким кодом не существует', form=form)
         return render_template('profile.html', title='Профиль', user=user, form=form)
     return render_template('profile.html', title='Профиль', user=user, form=form)
 
@@ -124,6 +125,79 @@ def study():
     if form.validate_on_submit():
         return redirect('/study/lesson_creation')
     return render_template('study.html', title='Обучение',  lessons=lessons, user=user, form=form)
+
+
+@app.route('/study/lesson', methods=['GET', 'POST'])
+def lesson():
+    form = LessonForm()
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.email == current_user.email).first()
+    lesson = db_sess.query(Lesson).filter(Lesson.id == request.args.get('id')).first()
+    tasks = db_sess.query(Task).filter(Task.lesson_id == lesson.id).all()
+    if form.validate_on_submit():
+        pass
+    return render_template('lesson.html', title=f'{lesson.title}', lesson=lesson, user=user, tasks=tasks, form=form)
+
+
+@app.route('/study/lesson/task_creation', methods=['GET', 'POST'])
+def task_creation():
+    form = TaskCreationForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        user = db_sess.query(User).filter(User.email == current_user.email).first()
+        lesson = db_sess.query(Lesson).filter(Lesson.id == request.args.get('id')).first()
+        task = Task(
+            title=form.title.data,
+            cond=form.cond.data,
+            lesson_id=lesson.id
+        )
+        db_sess.add(task)
+        db_sess.commit()
+        return redirect(f'/study/lesson?id={lesson.id}')
+    return render_template('task_creation.html', title='Создание урока', form=form)
+
+
+@app.route('/study/lesson/task', methods=['GET', 'POST'])
+def task():
+    form = TaskForm()
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.email == current_user.email).first()
+    task = db_sess.query(Task).filter(Task.id == request.args.get('id')).first()
+    lesson = db_sess.query(Lesson).filter(Lesson.id == task.lesson_id).first()
+    solutions = db_sess.query(Solution).filter(Solution.task_id == task.id, Solution.checked == None).all()
+    user_solution = db_sess.query(Solution).filter(Solution.task_id == task.id, Solution.user_id == user.id).first()
+    if form.validate_on_submit():
+        if db_sess.query(Solution).filter(Solution.task_id == task.id, Solution.user_id == user.id).first():
+            solution = db_sess.query(Solution).filter(Solution.task_id == task.id, Solution.user_id == user.id).first()
+            solution.text = form.solution.data
+            db_sess.commit()
+        else:
+            solution = Solution(
+                text=form.solution.data,
+                user_id=user.id,
+                task_id=task.id
+            )
+            db_sess.add(solution)
+            db_sess.commit()
+
+        return render_template('task.html', title=task.title, task=task, solutions=solutions,
+                               user_solution=user_solution, user=user, form=form)
+    return render_template('task.html', title=task.title, task=task, solutions=solutions,
+                           user_solution=user_solution, user=user, form=form)
+
+
+@app.route('/study/lesson/task/check/<solution_id>/<verdict>', methods=['GET', 'POST'])
+def check(solution_id, verdict):
+    db_sess = db_session.create_session()
+    solution = db_sess.query(Solution).filter(Solution.id == int(str(solution_id).replace('!1=', ''))).first()
+    if int(str(verdict).replace('!2=', '')) == 1:
+        solution.correct = True
+    else:
+        solution.correct = False
+    solution.checked = True
+    db_sess.commit()
+    return redirect(f'/study/lesson/task?id={solution.task_id}')
+
 
 
 if __name__ == '__main__':

@@ -33,3 +33,18 @@ class LessonCreationForm(FlaskForm):
 
 class StudyForm(FlaskForm):
     submit = SubmitField('Создать')
+
+
+class LessonForm(FlaskForm):
+    submit = SubmitField('Создать')
+
+
+class TaskCreationForm(FlaskForm):
+    title = StringField('Название задачи:', validators=[DataRequired()])
+    cond = TextAreaField('Условие задачи:')
+    submit = SubmitField('Создать задачу')
+
+
+class TaskForm(FlaskForm):
+    solution = TextAreaField('Решение:')
+    submit = SubmitField('Сдать решение')
