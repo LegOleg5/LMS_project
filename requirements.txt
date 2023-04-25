@@ -1,5 +1,6 @@
 flask
 sqlalchemy
 flask-wtf
+wtforms
 flask-login
 datetime
