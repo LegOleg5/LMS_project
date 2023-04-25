@@ -201,5 +201,5 @@ def check(solution_id, verdict):
 
 
 if __name__ == '__server__':
-    db_session.global_init("db/users.db")
+    db_session.global_init("users.db")
     app.run(port=8080, host='127.0.0.1', debug=True)
